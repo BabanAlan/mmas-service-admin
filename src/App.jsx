@@ -6,7 +6,8 @@ import AttendancePage from './pages/AttendancePage';
 import CertificationPage from './pages/CertificationPage';
 import AddStudentPage from './pages/AddStudentPage';
 import StudentsPage from './pages/StudentsPage';
-import './App.css';
+import PaymentsPage from './pages/PaymentsPage';
+import './styles/App.css';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/certification" element={<CertificationPage />} />
             <Route path="/add-student" element={<AddStudentPage />} />
             <Route path="/students" element={<StudentsPage />} />
+            <Route path="/payments" element={<PaymentsPage />} />
           </Routes>
         </main>
       </div>

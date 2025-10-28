@@ -81,7 +81,7 @@ const generateMmasId = (studio) => {
   // Форматируем номер с ведущими нулями (0001-9999)
   const formattedNumber = studentNumber.toString().padStart(4, '0');
   
-  return `${abbreviation}${formattedNumber}`;
+  return `${abbreviation}-${formattedNumber}`;
 };
 
 // Глобальный счетчик для уникальных ID
@@ -292,4 +292,49 @@ export const updateAttendance = (attendanceData) => {
   }
   
   return Promise.resolve();
+};
+
+// ---------------------- Payments ----------------------
+export const mockPayments = [];
+
+// Seed some payments based on attendance for demo
+mockAttendance.forEach((a) => {
+  if (a.present && a.duration > 0) {
+    mockPayments.push({
+      id: mockPayments.length + 1,
+      studentId: a.studentId,
+      date: a.date,
+      studio: a.studio,
+      amount: Math.round((a.duration / 60) * 500), // условно 500 руб/час
+      method: 'Наличные',
+      status: 'Оплачено'
+    });
+  }
+});
+
+// Add additional synthetic payments for testing UI
+for (let i = 0; i < Math.min(mockStudents.length, 20); i++) {
+  const s = mockStudents[i];
+  const day = (i % 28) + 1;
+  mockPayments.push({
+    id: mockPayments.length + 1,
+    studentId: s.id,
+    date: `2024-02-${day.toString().padStart(2, '0')}`,
+    studio: s.studio,
+    amount: 500 + (i % 4) * 250,
+    method: ['Наличные', 'Карта', 'Перевод'][i % 3],
+    status: i % 5 === 0 ? 'Не оплачено' : 'Оплачено'
+  });
+}
+
+export const getPaymentsByStudent = (studentId) => {
+  return Promise.resolve(
+    mockPayments.filter(p => p.studentId === studentId)
+  );
+};
+
+export const getPaymentsByDate = (date) => {
+  return Promise.resolve(
+    mockPayments.filter(p => p.date === date)
+  );
 };

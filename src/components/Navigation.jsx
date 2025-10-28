@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import './Navigation.css';
+import '../styles/Navigation.css';
 
 const Navigation = () => {
   const location = useLocation();
@@ -10,7 +10,8 @@ const Navigation = () => {
     { path: '/attendance', label: 'Посещаемость', icon: '📅' },
     { path: '/certification', label: 'Аттестация', icon: '🥋' },
     { path: '/add-student', label: 'Добавить ученика', icon: '➕' },
-    { path: '/students', label: 'Общая информация', icon: '📊' }
+    { path: '/students', label: 'Общая информация', icon: '📊' },
+    { path: '/payments', label: 'Оплаты', icon: '💳' }
   ];
 
   return (

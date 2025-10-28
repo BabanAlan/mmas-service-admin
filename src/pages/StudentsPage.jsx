@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { mockStudents, mockBelts, updateStudent, deleteStudent } from '../data/mockData';
 import { BeltDisplay } from '../utils/beltUtils';
-import './StudentsPage.css';
+import { formatDateToDDMMYYYY } from '../utils/dateUtils';
+import '../styles/StudentsPage.css';
 
 const StudentsPage = () => {
   const [students, setStudents] = useState([]);
@@ -37,6 +38,11 @@ const StudentsPage = () => {
       if (sortField === 'birthDate') {
         aVal = new Date(aVal);
         bVal = new Date(bVal);
+      } else if (sortField === 'belt') {
+        const aRank = mockBelts.indexOf(aVal);
+        const bRank = mockBelts.indexOf(bVal);
+        aVal = aRank === -1 ? Number.MAX_SAFE_INTEGER : aRank;
+        bVal = bRank === -1 ? Number.MAX_SAFE_INTEGER : bRank;
       } else if (typeof aVal === 'string') {
         aVal = aVal.toLowerCase();
         bVal = bVal.toLowerCase();
@@ -77,7 +83,6 @@ const StudentsPage = () => {
         student.id === editingStudent.id ? editingStudent : student
       ));
       setEditingStudent(null);
-      alert('Данные успешно обновлены!');
     } catch (error) {
       console.error('Ошибка обновления:', error);
       alert('Ошибка при обновлении данных');
@@ -95,7 +100,6 @@ const StudentsPage = () => {
     try {
       await deleteStudent(studentId);
       setStudents(prev => prev.filter(student => student.id !== studentId));
-      alert('Ученик успешно удален!');
     } catch (error) {
       console.error('Ошибка удаления:', error);
       alert('Ошибка при удалении ученика');
@@ -217,7 +221,7 @@ const StudentsPage = () => {
                         className="edit-input"
                       />
                     ) : (
-                      new Date(student.birthDate).toLocaleDateString('ru-RU')
+                      formatDateToDDMMYYYY(student.birthDate)
                     )}
                   </td>
                   <td>

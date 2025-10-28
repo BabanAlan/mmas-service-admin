@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { mockStudents, mockStudios, getAttendance, updateAttendance } from '../data/mockData';
+import { mockStudents, mockStudios, mockBelts, getAttendance, updateAttendance } from '../data/mockData';
 import { BeltDisplay } from '../utils/beltUtils';
-import './AttendancePage.css';
+import { formatDateToDDMMYYYY } from '../utils/dateUtils';
+import '../styles/AttendancePage.css';
 
 const AttendancePage = () => {
   const [selectedStudio, setSelectedStudio] = useState('');
@@ -9,6 +10,11 @@ const AttendancePage = () => {
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [beltFilter, setBeltFilter] = useState('');
+  const [studioFilter, setStudioFilter] = useState('');
+  const [sortField, setSortField] = useState('fullName');
+  const [sortDirection, setSortDirection] = useState('asc');
 
   useEffect(() => {
     setStudents(mockStudents);
@@ -27,6 +33,7 @@ const AttendancePage = () => {
       loadAttendance(selectedStudio, date);
     }
   };
+  // keep native date input for calendar UX
 
   const loadAttendance = async (studio, date) => {
     setLoading(true);
@@ -68,6 +75,20 @@ const AttendancePage = () => {
     }));
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field) => {
+    if (sortField !== field) return '↕️';
+    return sortDirection === 'asc' ? '↑' : '↓';
+  };
+
   const saveAttendance = async () => {
     if (!selectedStudio || !selectedDate) {
       alert('Выберите студию и дату');
@@ -99,9 +120,60 @@ const AttendancePage = () => {
     }
   };
 
-  const filteredStudents = students.filter(student => 
-    !selectedStudio || student.studio === selectedStudio
-  );
+  const filteredStudents = (() => {
+    let list = [...students];
+
+    // Поиск
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      list = list.filter(student =>
+        student.fullName.toLowerCase().includes(term) ||
+        student.mmasId.toLowerCase().includes(term)
+      );
+    }
+
+    // Фильтры
+    if (beltFilter) {
+      list = list.filter(student => student.belt === beltFilter);
+    }
+    if (studioFilter) {
+      list = list.filter(student => student.studio === studioFilter);
+    }
+
+    // Сортировка
+    list.sort((a, b) => {
+      let aVal;
+      let bVal;
+
+      if (sortField === 'present') {
+        aVal = attendance[a.id]?.present ? 1 : 0;
+        bVal = attendance[b.id]?.present ? 1 : 0;
+      } else if (sortField === 'duration') {
+        aVal = attendance[a.id]?.duration ?? 0;
+        bVal = attendance[b.id]?.duration ?? 0;
+      } else if (sortField === 'belt') {
+        const aRank = mockBelts.indexOf(a.belt);
+        const bRank = mockBelts.indexOf(b.belt);
+        aVal = aRank === -1 ? Number.MAX_SAFE_INTEGER : aRank;
+        bVal = bRank === -1 ? Number.MAX_SAFE_INTEGER : bRank;
+      } else {
+        aVal = a[sortField];
+        bVal = b[sortField];
+        if (typeof aVal === 'string') {
+          aVal = aVal.toLowerCase();
+          bVal = bVal.toLowerCase();
+        }
+      }
+
+      if (sortDirection === 'asc') {
+        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+      } else {
+        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+      }
+    });
+
+    return list;
+  })();
 
   return (
     <div className="attendance-page">
@@ -141,6 +213,35 @@ const AttendancePage = () => {
         </button>
       </div>
 
+      <div className="filters">
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="Поиск по ФИО или MMAS-ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="filter-group">
+          <select value={beltFilter} onChange={(e) => setBeltFilter(e.target.value)}>
+            <option value="">Все пояса</option>
+            {[...new Set(students.map(s => s.belt))].map(belt => (
+              <option key={belt} value={belt}>{belt}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <select value={studioFilter} onChange={(e) => setStudioFilter(e.target.value)}>
+            <option value="">Все студии</option>
+            {mockStudios.map(studio => (
+              <option key={studio} value={studio}>{studio}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {selectedStudio && selectedDate && (
         <div className="attendance-table">
           <h2>Список учеников</h2>
@@ -148,11 +249,12 @@ const AttendancePage = () => {
             <table>
               <thead>
                 <tr>
-                  <th>ФИО</th>
-                  <th>Пояс</th>
-                  <th>MMAS-ID</th>
-                  <th>Присутствовал</th>
-                  <th>Время (мин)</th>
+                  <th onClick={() => handleSort('fullName')}>ФИО {getSortIcon('fullName')}</th>
+                  <th onClick={() => handleSort('belt')}>Пояс {getSortIcon('belt')}</th>
+                  <th onClick={() => handleSort('mmasId')}>MMAS-ID {getSortIcon('mmasId')}</th>
+                  <th onClick={() => handleSort('studio')}>Студия {getSortIcon('studio')}</th>
+                  <th onClick={() => handleSort('present')}>Присутствовал {getSortIcon('present')}</th>
+                  <th onClick={() => handleSort('duration')}>Время (мин) {getSortIcon('duration')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,6 +265,7 @@ const AttendancePage = () => {
                       <BeltDisplay belt={student.belt} />
                     </td>
                     <td>{student.mmasId}</td>
+                    <td>{student.studio}</td>
                     <td>
                       <input
                         type="checkbox"

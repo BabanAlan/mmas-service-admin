@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { mockStudios, mockBelts, addStudent, studioAbbreviations, generateMmasId } from '../data/mockData';
-import './AddStudentPage.css';
+import '../styles/AddStudentPage.css';
 
 const AddStudentPage = () => {
   const [formData, setFormData] = useState({
@@ -26,8 +26,8 @@ const AddStudentPage = () => {
     
     if (!formData.mmasId.trim()) {
       newErrors.mmasId = 'MMAS-ID обязателен';
-    } else if (!/^[А-Яа-я]{2}\d{4}$/.test(formData.mmasId)) {
-      newErrors.mmasId = 'MMAS-ID должен быть в формате ТС0001 (сокращение студии + 4 цифры)';
+    } else if (!/^[А-Яа-я]{2}-\d{4}$/.test(formData.mmasId)) {
+      newErrors.mmasId = 'MMAS-ID должен быть в формате ТС-0001 (сокращение студии + 4 цифры)';
     }
     
     if (!formData.studio) {
@@ -53,8 +53,8 @@ const AddStudentPage = () => {
       }));
     }
     
-    // Автоматически генерируем mmas-id при выборе студии
-    if (name === 'studio' && value && !formData.mmasId) {
+    // Автоматически генерируем mmas-id при выборе студии (всегда обновляем при смене студии)
+    if (name === 'studio' && value) {
       try {
         const generatedId = generateMmasId(value);
         setFormData(prev => ({
@@ -160,30 +160,6 @@ const AddStudentPage = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="mmasId">MMAS-ID *</label>
-            <div className="mmas-id-input">
-              <input
-                type="text"
-                id="mmasId"
-                name="mmasId"
-                value={formData.mmasId}
-                onChange={handleInputChange}
-                placeholder="ТС0001"
-                className={errors.mmasId ? 'error' : ''}
-                style={{ textTransform: 'uppercase' }}
-              />
-              <button
-                type="button"
-                onClick={handleGenerateMmasId}
-                className="generate-btn"
-              >
-                Сгенерировать
-              </button>
-            </div>
-            {errors.mmasId && <span className="error-message">{errors.mmasId}</span>}
-          </div>
-
-          <div className="form-group">
             <label htmlFor="studio">Студия *</label>
             <select
               id="studio"
@@ -198,6 +174,31 @@ const AddStudentPage = () => {
               ))}
             </select>
             {errors.studio && <span className="error-message">{errors.studio}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="mmasId">MMAS-ID *</label>
+            <div className="mmas-id-input">
+              <input
+                type="text"
+                id="mmasId"
+                name="mmasId"
+                value={formData.mmasId}
+                onChange={handleInputChange}
+              placeholder="ТС-0001"
+                className={errors.mmasId ? 'error' : ''}
+                style={{ textTransform: 'uppercase' }}
+                disabled={false}
+              />
+              {/* <button
+                type="button"
+                onClick={handleGenerateMmasId}
+                className="generate-btn"
+              >
+                Сгенерировать
+              </button> */}
+            </div>
+            {errors.mmasId && <span className="error-message">{errors.mmasId}</span>}
           </div>
 
           <div className="form-actions">

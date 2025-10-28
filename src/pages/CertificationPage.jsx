@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { mockStudents, mockBelts, updateStudent } from '../data/mockData';
 import { BeltDisplay } from '../utils/beltUtils';
-import './CertificationPage.css';
+import '../styles/CertificationPage.css';
 
 const CertificationPage = () => {
   const [students, setStudents] = useState([]);
@@ -32,7 +32,12 @@ const CertificationPage = () => {
       let aVal = a[sortField];
       let bVal = b[sortField];
       
-      if (typeof aVal === 'string') {
+      if (sortField === 'belt') {
+        const aRank = mockBelts.indexOf(aVal);
+        const bRank = mockBelts.indexOf(bVal);
+        aVal = aRank === -1 ? Number.MAX_SAFE_INTEGER : aRank;
+        bVal = bRank === -1 ? Number.MAX_SAFE_INTEGER : bRank;
+      } else if (typeof aVal === 'string') {
         aVal = aVal.toLowerCase();
         bVal = bVal.toLowerCase();
       }
@@ -67,7 +72,6 @@ const CertificationPage = () => {
       setStudents(prev => prev.map(student => 
         student.id === studentId ? { ...student, belt: newBelt } : student
       ));
-      alert('Пояс успешно изменен!');
     } catch (error) {
       console.error('Ошибка обновления:', error);
       alert('Ошибка при изменении пояса');

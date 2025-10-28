@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './HomePage.css';
+import '../styles/HomePage.css';
 
 const HomePage = () => {
   const quickActions = [
@@ -31,6 +31,13 @@ const HomePage = () => {
       link: '/students',
       icon: '📊',
       color: '#9C27B0'
+    },
+    {
+      title: 'Оплаты',
+      description: 'Просмотр оплат по людям и по датам',
+      link: '/payments',
+      icon: '💳',
+      color: '#795548'
     }
   ];
 
@@ -58,33 +65,6 @@ const HomePage = () => {
               </div>
             </Link>
           ))}
-        </div>
-      </div>
-
-      <div className="stats-section">
-        <h2>Статистика</h2>
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon">👥</div>
-            <div className="stat-content">
-              <h3>245</h3>
-              <p>Всего учеников</p>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">🏢</div>
-            <div className="stat-content">
-              <h3>7</h3>
-              <p>Студий</p>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">🥋</div>
-            <div className="stat-content">
-              <h3>19</h3>
-              <p>Уровней поясов</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
